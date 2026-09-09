@@ -20,6 +20,14 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 const canHoverProjectPreview = window.matchMedia("(hover: hover) and (pointer: fine)");
 const pronunciationAudioCache = new Map();
 const visitReportSessionKey = "portfolioVisitReported";
+const portfolioEventSessionPrefix = "portfolioEvent";
+const portfolioEventTypes = new Set([
+  "project_opened",
+  "resume_opened",
+  "linkedin_clicked",
+  "email_clicked",
+  "document_opened",
+]);
 
 const projects = [
   {
@@ -930,6 +938,59 @@ function reportPortfolioVisit() {
   });
 }
 
+function normalizePortfolioEventScope(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function getPortfolioEventSessionKey(type, data = {}) {
+  const scope = normalizePortfolioEventScope(data.projectId || data.documentId || data.name || "");
+  return scope ? `${portfolioEventSessionPrefix}:${type}:${scope}` : `${portfolioEventSessionPrefix}:${type}`;
+}
+
+function reportPortfolioEvent(type, data = {}) {
+  if (!portfolioEventTypes.has(type)) {
+    return;
+  }
+
+  const sessionKey = getPortfolioEventSessionKey(type, data);
+
+  try {
+    if (window.sessionStorage.getItem(sessionKey) === "true") {
+      return;
+    }
+
+    window.sessionStorage.setItem(sessionKey, "true");
+  } catch {
+    return;
+  }
+
+  fetch("/api/event", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ type, data }),
+    keepalive: true,
+  }).catch(() => {
+    // Interaction notifications should never affect navigation or clicks.
+  });
+}
+
+function setupPortfolioEventTracking() {
+  const emailLink = document.querySelector('.contact-links a[href^="mailto:"]');
+  const linkedinLink = document.querySelector('.contact-links a[href*="linkedin.com"]');
+  const resumeLink = document.querySelector('.contact-links a[href*="resume-rares-andrei-stana.pdf"]');
+
+  emailLink?.addEventListener("click", () => reportPortfolioEvent("email_clicked"));
+  linkedinLink?.addEventListener("click", () => reportPortfolioEvent("linkedin_clicked"));
+  resumeLink?.addEventListener("click", () => reportPortfolioEvent("resume_opened"));
+}
+
 function syncHeader() {
   header.classList.toggle("is-scrolled", window.scrollY > 20);
 }
@@ -1221,7 +1282,7 @@ function buildProjectActions(project) {
   if (project.pdfUrl) {
     const pdfLabel = project.pdfLabel || "Read Report";
     actions.push(
-      `<a class="project-action" href="${escapeHtml(project.pdfUrl)}" target="_blank" rel="noreferrer">${escapeHtml(pdfLabel)} &#8599;</a>`
+      `<a class="project-action" href="${escapeHtml(project.pdfUrl)}" target="_blank" rel="noreferrer" data-document-link data-event-document-id="${escapeHtml(project.id)}" data-event-document-name="${escapeHtml(project.title)}">${escapeHtml(pdfLabel)} &#8599;</a>`
     );
   }
 
@@ -1641,7 +1702,7 @@ function openProjectModal(projectId) {
   const project = getProjectById(projectId);
 
   if (!project || !projectModal) {
-    return;
+    return false;
   }
 
   hideProjectPreview();
@@ -1669,6 +1730,8 @@ function openProjectModal(projectId) {
     },
     prefersReducedMotion.matches ? 1 : modalOpenDuration
   );
+
+  return true;
 }
 
 function closeProjectModal() {
@@ -1999,7 +2062,14 @@ projectList?.addEventListener("click", (event) => {
   }
 
   event.preventDefault();
-  openProjectModal(projectLink.dataset.projectId);
+  const project = getProjectById(projectLink.dataset.projectId);
+
+  if (openProjectModal(projectLink.dataset.projectId) && project) {
+    reportPortfolioEvent("project_opened", {
+      projectId: project.id,
+      projectName: project.title,
+    });
+  }
 });
 
 projectList?.addEventListener("keydown", (event) => {
@@ -2014,7 +2084,14 @@ projectList?.addEventListener("keydown", (event) => {
   }
 
   event.preventDefault();
-  openProjectModal(projectLink.dataset.projectId);
+  const project = getProjectById(projectLink.dataset.projectId);
+
+  if (openProjectModal(projectLink.dataset.projectId) && project) {
+    reportPortfolioEvent("project_opened", {
+      projectId: project.id,
+      projectName: project.title,
+    });
+  }
 });
 
 projectList?.addEventListener("pointerover", (event) => {
@@ -2061,6 +2138,16 @@ projectModal?.addEventListener("click", (event) => {
 });
 
 projectModalContent?.addEventListener("click", (event) => {
+  const documentLink = event.target.closest("[data-document-link]");
+
+  if (documentLink) {
+    reportPortfolioEvent("document_opened", {
+      documentId: documentLink.dataset.eventDocumentId,
+      documentName: documentLink.dataset.eventDocumentName,
+    });
+    return;
+  }
+
   const imageExpand = event.target.closest("[data-image-expand]");
 
   if (imageExpand) {
@@ -2223,4 +2310,5 @@ observeSkills();
 setupScrollReveals();
 setupMagneticTargets();
 setupPronunciationTriggers();
+setupPortfolioEventTracking();
 startFallingStars();
