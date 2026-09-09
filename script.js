@@ -19,6 +19,7 @@ const starLayer = document.querySelector("[data-star-layer]");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const canHoverProjectPreview = window.matchMedia("(hover: hover) and (pointer: fine)");
 const pronunciationAudioCache = new Map();
+const visitReportSessionKey = "portfolioVisitReported";
 
 const projects = [
   {
@@ -884,6 +885,49 @@ function getProjectAccent(category) {
 function getPaletteAccent(index = 0) {
   const accents = [colorPalette.muted, colorPalette.accent, colorPalette.light, colorPalette.surface];
   return accents[index % accents.length];
+}
+
+function reportPortfolioVisit() {
+  let sessionStorageAvailable = false;
+
+  try {
+    sessionStorageAvailable = Boolean(window.sessionStorage);
+
+    if (sessionStorageAvailable && window.sessionStorage.getItem(visitReportSessionKey) === "true") {
+      return;
+    }
+
+    if (sessionStorageAvailable) {
+      window.sessionStorage.setItem(visitReportSessionKey, "true");
+    }
+  } catch {
+    return;
+  }
+
+  if (!sessionStorageAvailable) {
+    return;
+  }
+
+  const payload = {
+    page: window.location.pathname || "/",
+    referrer: document.referrer || "",
+    screen: {
+      width: window.screen?.width || window.innerWidth || null,
+      height: window.screen?.height || window.innerHeight || null,
+    },
+    language: navigator.language || "",
+  };
+
+  fetch("/api/visit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  }).catch(() => {
+    // Notification failures should never affect the portfolio experience.
+  });
 }
 
 function syncHeader() {
@@ -2169,6 +2213,7 @@ window.addEventListener("resize", hideProjectPreview);
 
 syncHeader();
 syncScrollMotion();
+reportPortfolioVisit();
 setupHeroLetters();
 renderProjects();
 renderSkillColorLegend();
