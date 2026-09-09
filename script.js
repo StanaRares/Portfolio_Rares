@@ -14,6 +14,7 @@ const imageLightboxStage = document.querySelector("[data-lightbox-stage]");
 const imageLightboxClose = document.querySelector("[data-lightbox-close]");
 const skillsSection = document.querySelector("[data-skills-section]");
 const skillGroupsMount = document.querySelector("[data-skill-groups]");
+const skillColorLegend = document.querySelector("[data-skill-color-legend]");
 const starLayer = document.querySelector("[data-star-layer]");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const canHoverProjectPreview = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -332,14 +333,129 @@ const projects = [
     id: "this-portfolio",
     number: "08",
     title: "This Portfolio",
+    subtitle: "The project that brings everything else together.",
     shortDescription:
-      "The website you are currently exploring, designed and built as an interactive home for my work.",
+      "The project that brings everything else together.",
     description:
       "The site you are currently exploring, designed as a minimal but interactive home for projects, skills, contact details, and playful visual details.",
     category: "PERSONAL",
-    technologies: ["HTML", "CSS", "JavaScript"],
-    previewImage: "assets/projects/portfolio.svg",
-    images: ["assets/projects/portfolio.svg"],
+    technologies: ["HTML", "CSS", "JavaScript", "Responsive Design", "Interaction Design"],
+    previewImage: "assets/projects/portfolio-home.png",
+    images: [
+      "assets/projects/portfolio-home.png",
+      "assets/projects/portfolio-about.png",
+      "assets/projects/portfolio-projects.png",
+      "assets/projects/portfolio-skills.png",
+      "assets/projects/portfolio-contact.png",
+    ],
+    aboutIntro: [
+      [
+        {
+          text: "I built this portfolio as more than just a place to list projects. I wanted it to reflect how I actually work: ",
+        },
+        {
+          text: "I get curious about something, ask myself if I can build it, and then try to find out.",
+          strong: true,
+        },
+      ],
+      [
+        {
+          text: "That is where most of my projects come from. Sometimes it is a practical problem, sometimes a university assignment, and sometimes just a question I want to answer by building something around it.",
+        },
+      ],
+      [
+        { text: "A few projects mean more to me personally. My " },
+        { text: "LLM Debate Thesis", strong: true },
+        {
+          text: " is probably the most important because it is the project I graduated university with. ",
+        },
+        { text: "MeetMiddle", strong: true },
+        {
+          text: " is one I would genuinely love to publish one day because I think it could become a very wholesome app for helping groups of friends meet somewhere that is fair for everyone. ",
+        },
+        { text: "SplitSmart", strong: true },
+        { text: " represents my hackathon experience, while " },
+        { text: "Muscle Matrix", strong: true },
+        {
+          text: " was my first real university software project and, in a way, where all of this started.",
+        },
+      ],
+    ],
+    expandedAbout: {
+      title: "This Portfolio",
+      toggleLabel: "Read more ↓",
+      paragraphs: [
+        [
+          {
+            text: "I am also very grateful for the professional experience I have had. It gave me the opportunity to work on projects such as ",
+          },
+          { text: "Exammy", strong: true },
+          {
+            text: ", which unfortunately is not shown here because I no longer have access to the original platform after losing the credentials, but it was still an important part of learning how software is built outside university.",
+          },
+        ],
+        [{ text: "About the website", heading: "h4" }],
+        [
+          { text: "The portfolio itself is built with " },
+          { text: "HTML, CSS, and JavaScript", strong: true },
+          {
+            text: ", and I spent a lot of time on small details rather than making it a simple project grid.",
+          },
+        ],
+        [
+          {
+            text: "There are interactive project previews, animated project pages, image carousels, zoomable screenshots, keyboard controls, scroll animations, subtle magnetic button effects, falling stars, and even phonetic pronunciation and audio for my name. The animations also respect reduced-motion settings, and interactions adapt depending on whether the user is on a mouse or touch device.",
+          },
+        ],
+        [
+          {
+            text: "The Skills section is also designed around what I have actually used. Technologies are grouped by area and connected to personal, university, hackathon, and professional work instead of being shown as one large list.",
+          },
+        ],
+        [
+          { text: "Across my projects I have worked with technologies such as " },
+          {
+            text: "Python, JavaScript, TypeScript, React, React Native, Expo, FastAPI, Flask, Supabase, PostgreSQL, Docker, PyTorch, TensorFlow, LLMs, RAG, NLP, Ollama, LangChain, REST APIs, and cloud services",
+            strong: true,
+          },
+          { text: "." },
+        ],
+        [{ text: "Why screenshots?", heading: "h4" }],
+        [
+          {
+            text: "Many of these projects have their own backends, databases, AI models, APIs, or local services. I do not currently have my own server infrastructure to keep every backend running permanently, so some projects are represented through screenshots, videos, reports, and results instead.",
+          },
+        ],
+        [
+          { text: "If you are interested in one of them, " },
+          { text: "I can always run it and give you a proper demo.", strong: true },
+        ],
+        [{ text: "What's next?", heading: "h4" }],
+        [
+          {
+            text: "This portfolio will keep growing with the projects I build.",
+          },
+        ],
+        [
+          { text: "One of my main future goals is to " },
+          { text: "build my own language model", strong: true },
+          {
+            text: " so I can understand the process beyond simply using existing APIs. Once that is working, I want to use it to create ",
+          },
+          { text: "my own chatbot for this portfolio", strong: true },
+          {
+            text: ", allowing visitors to ask questions about me, my work, and my experience directly.",
+          },
+        ],
+        [
+          {
+            text: "Eventually, instead of reading through everything, you could simply ask:",
+          },
+        ],
+        [{ text: "\"Who is Rareș?\"", strong: true }],
+        [{ text: "P.S. I am not a graphic designer, so some of the visuals used throughout the portfolio are AI-generated."}],
+      ],
+    },
   },
 ];
 
@@ -359,6 +475,15 @@ const projectCategoryColors = {
   HACKATHON: "#ff9a5f",
   PROFESSIONAL: "#79c995",
 };
+
+const projectCategoryLabels = {
+  PERSONAL: "Personal projects",
+  PROFESSIONAL: "Work experience",
+  HACKATHON: "Events",
+  UNIVERSITY: "University",
+};
+
+const projectCategoryLegendOrder = ["PERSONAL", "PROFESSIONAL", "HACKATHON", "UNIVERSITY"];
 
 const skillGroups = [
   {
@@ -1183,15 +1308,34 @@ function renderTextSegments(segments = []) {
     .join("");
 }
 
+function renderAboutParagraphs(paragraphs = []) {
+  return paragraphs
+    .map((paragraph) => {
+      if (paragraph.length === 1 && paragraph[0].heading) {
+        const level = paragraph[0].heading === "h3" ? "h3" : "h4";
+        return `<${level}>${escapeHtml(paragraph[0].text || "")}</${level}>`;
+      }
+
+      return `<p>${renderTextSegments(paragraph)}</p>`;
+    })
+    .join("");
+}
+
+function buildProjectAboutIntro(project) {
+  const paragraphs = project.aboutIntro || [
+    [{ text: project.description || project.shortDescription || "" }],
+  ];
+
+  return renderAboutParagraphs(paragraphs);
+}
+
 function buildExpandedAbout(project) {
   if (!project.expandedAbout) {
     return "";
   }
 
   const { title, paragraphs = [], features = [], stack = [] } = project.expandedAbout;
-  const intro = paragraphs
-    .map((paragraph) => `<p>${renderTextSegments(paragraph)}</p>`)
-    .join("");
+  const intro = renderAboutParagraphs(paragraphs);
   const featureList = features.map((feature) => `<li>${escapeHtml(feature)}</li>`).join("");
   const stackList = stack
     .map(
@@ -1205,8 +1349,8 @@ function buildExpandedAbout(project) {
     .join("");
 
   return `
-    <button class="project-read-more" type="button" data-about-toggle aria-expanded="false">
-      Read more
+    <button class="project-read-more" type="button" data-about-toggle aria-expanded="false" data-toggle-label="${escapeHtml(project.expandedAbout.toggleLabel || "Read more")}" data-collapse-label="Show less">
+      ${escapeHtml(project.expandedAbout.toggleLabel || "Read more")}
     </button>
     <div class="project-about-more" data-about-more hidden>
       <h3>${escapeHtml(title)}</h3>
@@ -1265,7 +1409,7 @@ function renderProjectModal(project) {
       <section>
         <p class="project-modal-label">About</p>
         <div class="project-about" data-project-about>
-          <p>${escapeHtml(project.description || project.shortDescription)}</p>
+          ${buildProjectAboutIntro(project)}
           ${buildExpandedAbout(project)}
         </div>
       </section>
@@ -1535,6 +1679,31 @@ function getUsageLabel(categories = []) {
   return uniqueCategories.join(", ").toLowerCase();
 }
 
+function renderSkillColorLegend() {
+  if (!skillColorLegend) {
+    return;
+  }
+
+  const legendItems = projectCategoryLegendOrder
+    .filter((category) => projectCategoryColors[category])
+    .map(
+      (category) => `
+        <li class="skill-color-legend-item">
+          <span class="skill-color-swatch" style="--swatch-color: ${projectCategoryColors[category]}" aria-hidden="true"></span>
+          <span>${escapeHtml(projectCategoryLabels[category] || category.toLowerCase())}</span>
+        </li>
+      `
+    )
+    .join("");
+
+  skillColorLegend.innerHTML = `
+    <h3 id="skill-color-legend-title">What does each color mean</h3>
+    <ul>
+      ${legendItems}
+    </ul>
+  `;
+}
+
 function renderSkills() {
   if (!skillGroupsMount) {
     return;
@@ -1612,6 +1781,10 @@ function clearSkillGroup(groupElement) {
   });
 }
 
+function hideSkillColorLegend() {
+  skillColorLegend?.classList.remove("is-visible");
+}
+
 function bindSkillInteractions() {
   if (!skillGroupsMount) {
     return;
@@ -1621,6 +1794,7 @@ function bindSkillInteractions() {
     const button = event.target.closest(".skill-button");
 
     if (button) {
+      skillColorLegend?.classList.add("is-visible");
       setActiveSkill(button);
     }
   });
@@ -1651,6 +1825,10 @@ function bindSkillInteractions() {
     if (groupElement && !groupElement.contains(event.relatedTarget)) {
       clearSkillGroup(groupElement);
     }
+
+    if (!skillGroupsMount.contains(event.relatedTarget)) {
+      hideSkillColorLegend();
+    }
   });
 
   skillGroupsMount.addEventListener("focusout", (event) => {
@@ -1658,6 +1836,10 @@ function bindSkillInteractions() {
 
     if (groupElement && !groupElement.contains(event.relatedTarget)) {
       clearSkillGroup(groupElement);
+    }
+
+    if (!skillGroupsMount.contains(event.relatedTarget)) {
+      hideSkillColorLegend();
     }
   });
 }
@@ -1852,7 +2034,9 @@ projectModalContent?.addEventListener("click", (event) => {
     if (expandedContent) {
       expandedContent.hidden = isExpanded;
       aboutToggle.setAttribute("aria-expanded", String(!isExpanded));
-      aboutToggle.textContent = isExpanded ? "Read more" : "Show less";
+      aboutToggle.textContent = isExpanded
+        ? aboutToggle.dataset.toggleLabel || "Read more"
+        : aboutToggle.dataset.collapseLabel || "Show less";
     }
 
     return;
@@ -1987,6 +2171,7 @@ syncHeader();
 syncScrollMotion();
 setupHeroLetters();
 renderProjects();
+renderSkillColorLegend();
 renderSkills();
 bindSkillInteractions();
 observeSkills();
