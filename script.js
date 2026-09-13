@@ -1327,6 +1327,9 @@ function showProjectPreview(project, event) {
 
   activeProjectId = project.id;
   moveProjectPreview(event);
+  const isVisible = projectPreview.classList.contains("is-visible");
+  const nextImageUrl = new URL(project.previewImage, window.location.href).href;
+  const imageChanged = projectPreviewImage.src !== nextImageUrl;
 
   if (!previewAnimationFrame) {
     previewCurrentX = previewCurrentX || previewTargetX;
@@ -1334,8 +1337,27 @@ function showProjectPreview(project, event) {
     previewAnimationFrame = requestAnimationFrame(animateProjectPreview);
   }
 
-  if (!projectPreviewImage.src.endsWith(project.previewImage)) {
+  if (imageChanged) {
+    projectPreview.querySelectorAll(".project-preview-image-exit").forEach((image) => image.remove());
+
+    if (isVisible && projectPreviewImage.currentSrc) {
+      const outgoingImage = projectPreviewImage.cloneNode();
+      outgoingImage.removeAttribute("data-project-preview-image");
+      outgoingImage.classList.remove("is-entering");
+      outgoingImage.setAttribute("aria-hidden", "true");
+      projectPreview.append(outgoingImage);
+      requestAnimationFrame(() => {
+        outgoingImage.classList.add("project-preview-image-exit");
+      });
+      outgoingImage.addEventListener("transitionend", () => outgoingImage.remove(), { once: true });
+      window.setTimeout(() => outgoingImage.remove(), 320);
+    }
+
+    projectPreviewImage.classList.add("is-entering");
     projectPreviewImage.src = project.previewImage;
+    requestAnimationFrame(() => {
+      projectPreviewImage.classList.remove("is-entering");
+    });
   }
 
   projectPreviewImage.alt = "";

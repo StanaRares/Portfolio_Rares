@@ -627,10 +627,23 @@ a {
 }
 
 .project-preview img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transition: opacity 220ms ease, transform 260ms ease;
+}
+
+.project-preview img.is-entering {
+  opacity: 0;
+  transform: translate3d(14px, 0, 0) scale(0.985);
+}
+
+.project-preview-image-exit {
+  opacity: 0;
+  transform: translate3d(-14px, 0, 0) scale(0.985);
 }
 
 .project-modal {
