@@ -568,23 +568,37 @@ a {
   justify-content: center;
   min-height: 46px;
   margin: 34px auto 0;
-  padding: 0 20px;
-  border: 1px solid var(--line);
+  padding: 0 24px;
+  border: 1px solid color-mix(in srgb, var(--muted) 58%, var(--light));
   border-radius: 4px;
-  background: transparent;
-  color: var(--muted);
+  background:
+    linear-gradient(180deg, rgba(243, 247, 240, 0.08), rgba(107, 143, 113, 0.12)),
+    rgba(42, 26, 31, 0.76);
+  color: color-mix(in srgb, var(--light) 28%, var(--muted));
   font: inherit;
   font-size: 0.95rem;
   font-weight: 800;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(243, 247, 240, 0.04) inset;
   translate: var(--magnetic-x) var(--magnetic-y);
-  transition: border-color 240ms ease, color 240ms ease, transform 240ms ease, translate 180ms ease;
+  transition:
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    color 240ms ease,
+    transform 240ms ease,
+    translate 180ms ease;
 }
 
 .project-toggle:hover,
 .project-toggle:focus-visible {
-  border-color: var(--muted);
+  border-color: color-mix(in srgb, var(--muted) 54%, var(--light));
   color: var(--light);
   outline: 0;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.34),
+    0 0 24px rgba(107, 143, 113, 0.18),
+    0 0 0 1px rgba(243, 247, 240, 0.08) inset;
   transform: translateY(-2px);
 }
 
@@ -1854,33 +1868,52 @@ a {
     display: block;
   }
 
-.nav-links {
+  .nav-links {
     position: fixed;
-    top: 74px;
-    left: 14px;
+    top: 68px;
     right: 14px;
+    left: auto;
     display: grid;
-    gap: 0;
-    padding: 10px;
-    border: 1px solid var(--line);
+    width: min(178px, calc(100vw - 28px));
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--muted) 42%, var(--line));
     border-radius: 8px;
-    background: rgba(13, 8, 9, 0.7);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, var(--light)), var(--surface));
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.44),
+      0 0 0 1px color-mix(in srgb, var(--light) 5%, transparent) inset;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-10px);
+    transform: translate3d(0, -8px, 0) scale(0.98);
+    transform-origin: top right;
     transition: opacity 160ms ease, transform 160ms ease;
   }
 
   body.nav-open .nav-links {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   .nav-links a {
-    padding: 14px;
+    padding: 11px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: color-mix(in srgb, var(--light) 90%, var(--muted));
+    background: color-mix(in srgb, var(--dark) 68%, var(--surface));
+    font-size: 0.9rem;
+    text-align: left;
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    border-color: color-mix(in srgb, var(--muted) 48%, var(--light));
+    background: color-mix(in srgb, var(--muted) 18%, var(--dark));
+    color: var(--light);
   }
 
   .hero {
@@ -2114,6 +2147,10 @@ a {
 
 @media (hover: none), (pointer: coarse) {
   .project-preview {
+    display: none;
+  }
+
+  .skill-color-legend {
     display: none;
   }
 }

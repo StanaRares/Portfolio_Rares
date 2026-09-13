@@ -51,6 +51,42 @@ const projects = [
     ],
     pdfUrl: "assets/thesis-rares-stana.pdf",
     pdfLabel: "Read Thesis",
+    expandedAbout: {
+      title: "About the thesis",
+      toggleLabel: "Read more",
+      paragraphs: [
+        [
+          {
+            text: "For my Bachelor’s thesis, I investigated whether large language models can reliably judge debates between other language models, especially when one participant is intentionally deceptive.",
+          },
+        ],
+        [
+          {
+            text: "I built a multi-turn debate system around the FEVER fact-verification dataset, where different LLM agents were instructed to argue truthfully or deceptively while a separate LLM acted as the judge. The judge had to determine the correct factual label, assess the quality of the arguments, and identify behaviours such as unsupported claims, contradictions, cherry-picking, overconfidence, and deliberate deception.",
+          },
+        ],
+        [
+          {
+            text: "I compared two main setups: one where the agents relied only on prompting and another where they were given retrieved evidence through a RAG pipeline. This allowed me to study not only whether access to evidence improved the debate itself, but also whether it made deceptive behaviour easier for the judge to detect.",
+          },
+        ],
+        [
+          {
+            text: "The results showed that retrieval generally improved factual accuracy and grounding. However, detecting deception was much harder. The judge often trusted convincing or well-supported arguments even when they came from an agent that had been explicitly instructed to mislead it. Cases where the available evidence was insufficient were particularly difficult, highlighting how easily confidence and presentation can influence an automated evaluator.",
+          },
+        ],
+        [
+          {
+            text: "The project combined local LLM inference, retrieval-augmented generation, automated experimentation, behavioural evaluation, and result analysis. Beyond the final thesis, I also built an interactive interface for exploring debates and their evaluations.",
+          },
+        ],
+        [
+          {
+            text: "This project became the main research project of my Bachelor’s degree and gave me the opportunity to explore a question I find especially interesting: as AI systems increasingly evaluate other AI systems, how much can we actually trust the judge?",
+          },
+        ],
+      ],
+    },
     status: "Research project",
   },
   {
@@ -117,6 +153,47 @@ const projects = [
       "assets/projects/bunq-compare.png",
       "assets/projects/bunq-stats.png",
     ],
+    expandedAbout: {
+      title: "About SplitSmart",
+      toggleLabel: "Read more",
+      paragraphs: [
+        [
+          {
+            text: "SplitSmart was built during a bunq hackathon as a smarter way to manage shared expenses between groups of people.",
+          },
+        ],
+        [
+          {
+            text: "The idea came from a common problem with expense-splitting apps: they usually assume that every purchase should be divided equally or that users already know exactly how each transaction should be assigned. SplitSmart instead tries to understand the expense itself and help users decide how it should be split.",
+          },
+        ],
+        [
+          {
+            text: "The application allows users to upload receipts, extract their contents using OCR, and separate items into shared and personal expenses. From there, users can review the detected products, decide who participated in each expense, and calculate a more accurate split instead of simply dividing the entire bill evenly.",
+          },
+        ],
+        [
+          {
+            text: "We built the project with a React frontend and a FastAPI backend, while also integrating the bunq sandbox environment to connect the concept to real banking workflows. AI was used to help interpret receipt data and turn messy purchase information into structured expenses that could be edited and reviewed by the user.",
+          },
+        ],
+        [
+          {
+            text: "A large part of the challenge was designing something that felt useful rather than adding AI simply for the sake of it. The goal was to reduce the manual work involved in splitting a bill while still keeping the user in control of the final result.",
+          },
+        ],
+        [
+          {
+            text: "The hackathon was also one of my first experiences building a complete product under significant time pressure. We had to move quickly from idea to interface, backend, integrations, and a working demo while continuously adjusting the scope based on what we could realistically finish.",
+          },
+        ],
+        [
+          {
+            text: "More than anything, I enjoyed the experience because it showed me how much can be built in a very short period of time when a small team is focused on one clear problem.",
+          },
+        ],
+      ],
+    },
   },
   {
     id: "snias",
@@ -372,28 +449,28 @@ const projects = [
           text: "That is where most of my projects come from. Sometimes it is a practical problem, sometimes a university assignment, and sometimes just a question I want to answer by building something around it.",
         },
       ],
-      [
-        { text: "A few projects mean more to me personally. My " },
-        { text: "LLM Debate Thesis", strong: true },
-        {
-          text: " is probably the most important because it is the project I graduated university with. ",
-        },
-        { text: "MeetMiddle", strong: true },
-        {
-          text: " is one I would genuinely love to publish one day because I think it could become a very wholesome app for helping groups of friends meet somewhere that is fair for everyone. ",
-        },
-        { text: "SplitSmart", strong: true },
-        { text: " represents my hackathon experience, while " },
-        { text: "Muscle Matrix", strong: true },
-        {
-          text: " was my first real university software project and, in a way, where all of this started.",
-        },
-      ],
     ],
     expandedAbout: {
       title: "This Portfolio",
-      toggleLabel: "Read more ↓",
+      toggleLabel: "Read more",
       paragraphs: [
+        [
+          { text: "A few projects mean more to me personally. My " },
+          { text: "LLM Debate Thesis", strong: true },
+          {
+            text: " is probably the most important because it is the project I graduated university with. ",
+          },
+          { text: "MeetMiddle", strong: true },
+          {
+            text: " is one I would genuinely love to publish one day because I think it could become a very wholesome app for helping groups of friends meet somewhere that is fair for everyone. ",
+          },
+          { text: "SplitSmart", strong: true },
+          { text: " represents my hackathon experience, while " },
+          { text: "Muscle Matrix", strong: true },
+          {
+            text: " was my first real university software project and, in a way, where all of this started.",
+          },
+        ],
         [
           {
             text: "I am also very grateful for the professional experience I have had. It gave me the opportunity to work on projects such as ",
@@ -1898,6 +1975,10 @@ function bindSkillInteractions() {
   }
 
   skillGroupsMount.addEventListener("pointerover", (event) => {
+    if (event.pointerType !== "mouse") {
+      return;
+    }
+
     const button = event.target.closest(".skill-button");
 
     if (button) {
@@ -2049,9 +2130,20 @@ navLinks.forEach((link) => {
 window.addEventListener("scroll", queueScrollMotion, { passive: true });
 
 projectToggle?.addEventListener("click", () => {
+  const wasExpanded = projectsExpanded;
+  const toggleTopBeforeRender = projectToggle.getBoundingClientRect().top;
+
   projectsExpanded = !projectsExpanded;
   hideProjectPreview();
   renderProjects();
+
+  if (wasExpanded && !projectsExpanded) {
+    const toggleTopAfterRender = projectToggle.getBoundingClientRect().top;
+    window.scrollBy({
+      top: toggleTopAfterRender - toggleTopBeforeRender,
+      behavior: "auto",
+    });
+  }
 });
 
 projectList?.addEventListener("click", (event) => {
